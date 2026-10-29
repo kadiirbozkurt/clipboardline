@@ -132,7 +132,7 @@ Bunlar macOS tablosundan ayrı Windows varsayılanlarıdır. Command yerine Cont
 
 | Varsayılan | İşlem | Nerede / ayrıntı |
 | --- | --- | --- |
-| `Ctrl+Alt+T` | Askıları aç / kapat | Başka uygulama etkinken çalışır. |
+| `Ctrl+Alt+V` | Askıları aç / kapat | Başka uygulama etkinken çalışır. |
 | `Ctrl+Alt+S` | Askı aramasını aç | Askıları, ortak arama alanı odaktayken açar. |
 | `Varsayılan kapalı` | Kütüphaneyi genel kısayolla aç | Ayarlar’dan ata; normal Kütüphane penceresini açar. |
 | `Varsayılan kapalı` | Son görseli genel kısayolla kopyala | Ayarlar’dan ata; düzenlenmiş görseli kopyalar, odak dış uygulamada kalır. |
@@ -162,13 +162,17 @@ Bunlar macOS tablosundan ayrı Windows varsayılanlarıdır. Command yerine Cont
 
 | Varsayılan | İşlem | Nerede / ayrıntı |
 | --- | --- | --- |
-| `Enter` | Seçimi / geçerli önizlemeyi kopyala | Askı/askı önizlemesinde kopyalar, askı ve önizlemeyi kapatıp odağı geri verir. Kütüphane ve oradan açılan önizleme açık kalarak kopyalar. Düzenleyiciler ve pencereler Enter’ı önce kendileri işler. |
+| `Enter` | Seçimi önceki uygulamaya yapıştır | Win+V gibi. Düzenlenebilir hedef yoksa kopyalar ve bunu bildirir. Önceki davranış: seçimi / geçerli önizlemeyi kopyala | Askı/askı önizlemesinde kopyalar, askı ve önizlemeyi kapatıp odağı geri verir. Kütüphane ve oradan açılan önizleme açık kalarak kopyalar. Düzenleyiciler ve pencereler Enter’ı önce kendileri işler. |
 | `Ctrl+C` | Kopyala ve gezinmeye devam et | Seçili grup veya önizleme açıksa geçerli öğe. |
 | `Ctrl+Enter` | Önceki uygulamaya yapıştır | Önceki düzenlenebilir hedef gerekir; güvenli veya değişmiş hedefler reddedilir. Metin/görsel düzenlerken önce kaydedip düzenlemeyi bitirir. |
 | `P / Ctrl+P` | Sabitle / favori durumunu değiştir | Görsel, metin ve linkler için tek işlem; çoklu seçimi destekler. Sabitle kısayolu değiştirilince Ctrl+P eşdeğeri de değişir. |
 | `F / Ctrl+Shift+F` | Yalnız sabitlenenleri aç/kapat | Etkin askı veya kütüphanenin kayıtlı/sabitlenen kapsamı; önizlemede çalışır. Filtre kısayolu değiştirilince Ctrl+Shift+F eşdeğeri de değişir. |
 | `Shift+P` | Klasöre ekleyerek sabitle | Toplu seçici: yazarak ara; ↑/↓ seç; Enter onayla; Esc çık. Seçicide Ctrl+N klasör oluşturur. |
-| `Alt+P` | Adlandır ve sabitle | Çoklu seçimde Enter geçerli adı kaydedip sıradakine geçer; Esc kalan öğeleri değiştirmeden çıkar. |
+| `Alt+P / F2` | Adlandır ve sabitle | Çoklu seçimde Enter geçerli adı kaydedip sıradakine geçer; Esc kalan öğeleri değiştirmeden çıkar. |
+| `Ctrl+D` | Sabitle / sabitlemeyi kaldır | P / Ctrl+P ile aynı. |
+| `F1 / ?` | Klavye kısayolları | Bulunduğun yerde çalışan tüm tuşları gösterir. |
+| `Karta sağ tık` | O kartın işlemleri | Kartı seçer ve İşlemler menüsünü açar. |
+| `Fare tekerleği / ipte sürükleme` | O ipi kaydır | İp boyunca bir sayfa kayar; son kartı geçen ok tuşu da aynısını yapar. |
 | `Ctrl+Shift+T` | Etiket ekle | Seçili gruba uygulanır; her öğenin mevcut etiketlerini korur. |
 | `S` | Askıdan kaldır | Yalnız askılar/askı önizlemeleri. Sıradaki kalan komşu seçilir; açık önizleme kapanmaz. Saklanan kayıtlar kütüphanede kalır. |
 | `Backspace` | Askı kaldırmasını geri al | Askılar/önizlemeler: son kaldırma; bu oturumda en fazla 32 grup. Kütüphanede Çöp Kutusu onayını açar. |
@@ -311,7 +315,7 @@ Geçmiş 1.7.2 sürümü; metin/görsel yapıştırma, odağı geri döndürme, 
 | Özellik | macOS | Windows |
 | --- | --- | --- |
 | İçerik askıları ve kütüphane | Yerel AppKit/SwiftUI; görsel/metin/link askıları, ızgara/liste, klasör, etiket ve sabitleme. | Saydam eğri askılar; birleşik araç çubuğu, ızgara/liste, klasör, etiket, sabitleme, not ve açılıp kapanan kenar/ayrıntı panelli normal boyutlandırılabilir kütüphane. |
-| Varsayılan genel kısayollar | ⌃⌥T askılar; ⌃⌥S arama. | Ctrl+Alt+T askılar; Ctrl+Alt+S arama; Ctrl+Alt+A ekran yakalama. Kütüphane ve son görseli kopyalama genel kısayolları atanabilir; varsayılan kapalıdır. |
+| Varsayılan genel kısayollar | ⌃⌥T askılar; ⌃⌥S arama. | Ctrl+Alt+V askılar; Ctrl+Alt+S arama; Ctrl+Alt+A ekran yakalama. Kütüphane ve son görseli kopyalama genel kısayolları atanabilir; varsayılan kapalıdır. |
 | Yerel kısayol değiştiricileri | Uygulama komutlarında Command (⌘); adlandırma/sayfalarda Option (⌥). | Command yerine Control; Option yerine Alt. Yerel ve genel kısayollar değiştirilebilir. |
 | Pano toplama | Görsel/metin isteğe bağlı; tek URL toplama varsayılan açık, ayarlanabilir. | Görsel/metin toplama varsayılan kapalı, tek URL toplama açıktır. Kaynaklar’dan değiştirilebilir; eski seçimler korunur. Metin ve linkler sessiz eklenir. |
 | Arama ve OCR | Apple Vision OCR; isteğe bağlı özgün MobileCLIP-S2 görsel anlam araması. | Yerel İngilizce/Türkçe Tesseract OCR ve ONNX/WASM ile özgün MobileCLIP-S2 görsel anlam araması. Kütüphanenin metin/görsel/birleşik modları ve kapsam filtreleri çevrimdışı çalışır. |

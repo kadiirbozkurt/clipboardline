@@ -158,7 +158,7 @@ Geçmiş yerel kalır; platformlar arası otomatik aktarım veya bulut senkroniz
 sunulmaz.
 
 Windows'ta Command yerine **Control**, Option yerine **Alt** kullanılır. Genel
-kısayollar `Ctrl+Alt+T` (askı), `Ctrl+Alt+S` (arama) ve `Ctrl+Alt+A` (ekran
+kısayollar `Ctrl+Alt+V` (askı), `Ctrl+Alt+S` (arama) ve `Ctrl+Alt+A` (ekran
 yakalama) olarak gelir; Ayarlar'dan değiştirilebilir. [Türkçe Windows kısayol tablosu](../README.tr.md#windows-varsayılan-klavye-kısayolları), beş genel ve değiştirilebilir yerel işlemlerin yanı sıra sabit düzenleyici/pencere tuşlarını ve bağlamlarını içerir. Enter askı/askı önizlemesinde kopyalayıp kapatır, odağı önceki uygulamaya döndürür. Kütüphane ve oradan açılan önizlemede kopyalayıp açık kalır. Normal askı tıklaması kapatmadan kopyalar; yalnızca seçim için Öğe seç modunu veya Ctrl/Shift tuşlarını kullan.
 
 ### Windows arayüzü ve güncellemeler — 1.7.3 adayı

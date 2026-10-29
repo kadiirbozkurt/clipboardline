@@ -132,7 +132,7 @@ These are the Windows defaults, separate from the macOS table. Control replaces 
 
 | Default | Action | Where / details |
 | --- | --- | --- |
-| `Ctrl+Alt+T` | Show / hide shelves | Works while another application is active. |
+| `Ctrl+Alt+V` | Show / hide shelves | Works while another application is active. |
 | `Ctrl+Alt+S` | Open shelf search | Shows shelves with the shared search field focused. |
 | `Off by default` | Open Library globally | Record a shortcut in Settings; opens the normal Library window. |
 | `Off by default` | Copy latest image globally | Record a shortcut in Settings; copies the rendered image while keeping the external app focused. |
@@ -162,13 +162,17 @@ These are the Windows defaults, separate from the macOS table. Control replaces 
 
 | Default | Action | Where / details |
 | --- | --- | --- |
-| `Enter` | Copy selection / current preview | Shelves/shelf previews: copies and closes shelves/preview, returning focus. Library and Library-origin previews: copies and stays open. Editors and dialogs handle Enter first. |
+| `Enter` | Paste selection into the previous app | Like Win+V. If no editable target is available it copies instead and says so. Previously: copy selection / current preview | Shelves/shelf previews: copies and closes shelves/preview, returning focus. Library and Library-origin previews: copies and stays open. Editors and dialogs handle Enter first. |
 | `Ctrl+C` | Copy and keep browsing | Selected batch, or the current item when a preview is open. |
 | `Ctrl+Enter` | Paste into the previous app | Needs the original editable target; secure or changed targets are rejected. While editing text/image, saves and finishes editing first. |
 | `P / Ctrl+P` | Toggle pin / favorite | One action for images, text and links; supports selected batches. Remapping Pin also replaces Ctrl+P. |
 | `F / Ctrl+Shift+F` | Toggle pinned-only results | Active shelf, or Library saved/pinned scope; previews support it. Remapping the filter also replaces Ctrl+Shift+F. |
 | `Shift+P` | Pin to folder | Batch picker: type to filter; ↑/↓ choose; Enter confirms; Esc exits. Ctrl+N creates a folder in the picker. |
-| `Alt+P` | Name and pin | With multiple selections, Enter saves the current name and advances; Esc leaves remaining items unchanged. |
+| `Alt+P / F2` | Name and pin | With multiple selections, Enter saves the current name and advances; Esc leaves remaining items unchanged. |
+| `Ctrl+D` | Toggle pin | Same as P / Ctrl+P. |
+| `F1 / ?` | Keyboard shortcuts | Shows every key that works where you are. |
+| `Right-click a card` | Actions for that card | Selects the card and opens Actions. |
+| `Mouse wheel / drag on a line` | Scroll that line | Moves one page along the line; arrows past the last card do the same. |
 | `Ctrl+Shift+T` | Add tags | Applies to the selected batch; preserves each item’s existing tags. |
 | `S` | Take down from shelf | Shelves/shelf previews only. The next surviving neighbor stays selected and an open preview stays open. Saved records remain in Library. |
 | `Backspace` | Undo shelf take-down | Shelves/previews: latest removal, up to 32 batches this session. Library opens the Trash confirmation instead. |
@@ -311,7 +315,7 @@ The historical 1.7.2 release was checked in actual Windows source, packaged and 
 | Capability | macOS | Windows |
 | --- | --- | --- |
 | Content shelves and Library | Native AppKit/SwiftUI; image/text/link shelves, grid/list, folders, tags and pins. | Transparent curved hanging shelves; a normal resizable Library window with unified toolbar, grid/list, folders, tags, pins, notes and toggled sidebar/inspector. |
-| Default global shortcuts | ⌃⌥T shelves; ⌃⌥S search. | Ctrl+Alt+T shelves; Ctrl+Alt+S search; Ctrl+Alt+A screen capture. Global Library and copy-latest-image shortcuts are configurable and off by default. |
+| Default global shortcuts | ⌃⌥T shelves; ⌃⌥S search. | Ctrl+Alt+V shelves; Ctrl+Alt+S search; Ctrl+Alt+A screen capture. Global Library and copy-latest-image shortcuts are configurable and off by default. |
 | Local shortcut modifiers | Command (⌘) for app commands; Option (⌥) for naming/pages. | Control replaces Command; Alt replaces Option. Local and global bindings are configurable. |
 | Clipboard collection | Image/text opt-in; standalone-link capture defaults on and is configurable. | Image/text collection defaults off; standalone-link capture defaults on. Each can be changed in Sources; existing choices are preserved. Text and link capture stays silent. |
 | Search and OCR | Apple Vision OCR; optional original MobileCLIP-S2 semantic image search. | Local Tesseract English/Turkish OCR and original MobileCLIP-S2 semantic image search through ONNX/WASM. Library text/visual/combined modes and scoped filters work offline. |
