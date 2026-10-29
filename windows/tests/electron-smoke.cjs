@@ -67,7 +67,7 @@ async function main(){
   const before=await page.evaluate(()=>window.clipboardLine.state());assert.equal(before.version,expectedVersion);
   const licenses=await application.evaluate(({app})=>{if(!app.isPackaged)return null;const fs=process.getBuiltinModule('node:fs'),path=process.getBuiltinModule('node:path');return{mit:fs.readFileSync(path.join(process.resourcesPath,'LICENSE.txt'),'utf8').includes('Alejandro Buján'),notices:fs.existsSync(path.join(process.resourcesPath,'THIRD_PARTY_NOTICES.md')),apache:fs.readFileSync(path.join(process.resourcesPath,'licenses','LICENSE-Tesseract-core-and-data.txt'),'utf8').includes('Apache License'),chromium:fs.existsSync(path.join(process.resourcesPath,'..','LICENSES.chromium.html'))};});
   if(licenses){assert.ok(licenses.mit&&licenses.notices&&licenses.apache&&licenses.chromium,JSON.stringify(licenses));check('installed MIT/Apache/Electron/Chromium licensing notices are present');}
-  assert.equal(before.settings.captureText,false);assert.equal(before.settings.captureImages,false);assert.equal(before.settings.captureLinks,true);assert.equal(before.settings.fetchLinkMetadata,true);
+  assert.equal(before.settings.captureText,false);assert.equal(before.settings.captureImages,true);assert.equal(before.settings.captureLinks,true);assert.equal(before.settings.fetchLinkMetadata,true);
   await page.evaluate(()=>window.clipboardLine.command('setSettings',{patch:{captureText:true,captureImages:true,captureLinks:true,fetchLinkMetadata:false}}));
   await application.evaluate(async({clipboard})=>{await clipboard.writeText('Windows clipboard text acceptance');await global.__clipboardLineTest.readClipboard();});
   let state=await page.evaluate(()=>window.clipboardLine.state());const textItem=state.items.find(i=>i.text==='Windows clipboard text acceptance');assert.ok(textItem);check('real native text clipboard capture');
@@ -366,7 +366,7 @@ async function main(){
   application=await electron.launch({...(process.env.CLIPBOARDLINE_EXECUTABLE?{executablePath:path.resolve(process.env.CLIPBOARDLINE_EXECUTABLE),args:[]}:{args:[path.resolve('.')]}),timeout:60000});
   const productionPage=await application.firstWindow();activePage=productionPage;await productionPage.waitForFunction(()=>!!window.clipboardLine);
   const production=await until(()=>productionPage.evaluate(()=>window.clipboardLine.state()),value=>value.windowVisible===true);
-  assert.equal(production.settings.captureText,false);assert.equal(production.settings.captureImages,false);assert.equal(production.settings.captureLinks,true);assert.equal(production.settings.fetchLinkMetadata,true);
+  assert.equal(production.settings.captureText,false);assert.equal(production.settings.captureImages,true);assert.equal(production.settings.captureLinks,true);assert.equal(production.settings.fetchLinkMetadata,true);
   assert.equal(await application.evaluate(()=>typeof global.__clipboardLineTest),'undefined');
   assert.equal(await productionPage.evaluate(async()=>{try{await fetch('https://example.com');return false;}catch{return true;}}),true);
   await productionPage.screenshot({path:path.join(output,'production-startup.png')});check('normal production startup creates tray/services, keeps image/text opt-in, matches Mac link defaults and blocks renderer network');

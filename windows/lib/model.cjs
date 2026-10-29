@@ -10,14 +10,15 @@ const MANAGED_MEDIA=/^[a-f0-9]{64}\.(png|mp4|mov)$/;
 
 const KINDS = ['image', 'text', 'link'];
 const DEFAULTS = Object.freeze({
-  visibleKinds: KINDS, captureText: false, captureImages: false, captureLinks: true,fetchLinkMetadata:true,
+  visibleKinds: KINDS, captureText: false, captureImages: true, captureLinks: true,fetchLinkMetadata:true,
   retentionDays: {image: 30, text: 30, link: 30},
-  shortcuts: {toggle: 'Control+Alt+T', search: 'Control+Alt+S', library:'', copyLatest:'', screenshot: 'Control+Alt+A'},
+  shortcuts: {toggle: 'Control+Alt+V', search: 'Control+Alt+S', library:'', copyLatest:'', screenshot: 'Control+Alt+A'},
   localShortcuts: {},
-  autoCheckUpdates: true, watchFolders: [], openAfterScreenshot: true,
+  autoCheckUpdates: false, watchFolders: [], openAfterScreenshot: true,
   theme:'soft', cardSize:'medium', sounds:false, launchAtLogin:false, language:'system',indexImages:true,
   libraryListMode:false,libraryInspectorVisible:true,librarySidebarVisible:true,librarySidebarWidth:220,libraryInspectorWidth:300,
-  libraryListColumns:{title:300,kind:80,tags:150,created:130},recentPinFolderIds:[]
+  libraryListColumns:{title:300,kind:80,tags:150,created:130},recentPinFolderIds:[],
+  swayCards:true, windowsProfile:1
 });
 const clone = value => structuredClone(value);
 const fail = message => { throw new Error(message); };
@@ -34,7 +35,7 @@ function settings(patch, previous = DEFAULTS) {
   if (!patch || typeof patch !== 'object' || Array.isArray(patch)) fail('Invalid settings');
   const out = clone(previous);
   for (const [key, value] of Object.entries(patch)) {
-    if (['captureText', 'captureImages', 'captureLinks', 'fetchLinkMetadata','autoCheckUpdates', 'openAfterScreenshot','sounds','launchAtLogin','indexImages','libraryListMode','libraryInspectorVisible','librarySidebarVisible'].includes(key)) {
+    if (['captureText', 'captureImages', 'captureLinks', 'fetchLinkMetadata','autoCheckUpdates', 'openAfterScreenshot','sounds','launchAtLogin','indexImages','libraryListMode','libraryInspectorVisible','librarySidebarVisible','swayCards'].includes(key)) {
       if (typeof value !== 'boolean') fail('Invalid preference');
       out[key] = value;
     } else if (key === 'visibleKinds') {
@@ -71,11 +72,22 @@ function settings(patch, previous = DEFAULTS) {
     } else if (['theme','cardSize','language'].includes(key)) {
       const values={theme:['soft','neutral'],cardSize:['small','medium','large'],language:['system','en','tr','es','fr','pt-BR','az','zh-Hans','ja','ko']};
       if(!values[key].includes(value))fail('Invalid appearance preference');out[key]=value;
+    } else if (key === 'windowsProfile') {
+      if (!Number.isInteger(value) || value < 0 || value > 100) fail('Invalid profile version');
+      out.windowsProfile = value;
     } else if (key === 'watchFolders') {
       if (!Array.isArray(value) || value.length > 20 || value.some(v => typeof v !== 'string' || !path.isAbsolute(v) || v.length > 4096)) fail('Invalid watched folder');
       out.watchFolders = [...new Set(value)];
     } else fail('Unknown preference');
   }
+  return out;
+}
+// One-time move to the Windows profile defaults. Reads the raw stored settings:
+// the merged settings already carry the new defaults for missing keys.
+function migrateWindowsProfile(stored) {
+  if (!stored || typeof stored !== 'object' || (stored.windowsProfile || 0) >= 1) return stored;
+  const out = {...stored, captureImages: true, autoCheckUpdates: false, windowsProfile: 1};
+  if (stored.shortcuts?.toggle === 'Control+Alt+T') out.shortcuts = {...stored.shortcuts, toggle: 'Control+Alt+V'};
   return out;
 }
 function trashUndoFingerprint(item){return crypto.createHash('sha256').update(JSON.stringify(item)).digest('hex');}
@@ -108,7 +120,9 @@ class Store {
       let parsed;
       try { parsed = JSON.parse(fs.readFileSync(this.file, 'utf8')); } catch { fail('Library is unreadable. Original data was preserved; recover library.json.backup.'); }
       if (parsed.schema !== 1 || !Array.isArray(parsed.items) || parsed.items.length > 20000 || !Array.isArray(parsed.folders)) fail('Unsupported library format');
-      this.data = {...parsed, settings: settings(parsed.settings)};
+      const migrated = migrateWindowsProfile(parsed.settings);
+      this.data = {...parsed, settings: settings(migrated)};
+      this.migratedSettings = migrated !== parsed.settings;
       for (const item of this.data.items) this.validateStored(item);
       if(this.data.pendingDeletionFiles&&(!Array.isArray(this.data.pendingDeletionFiles)||this.data.pendingDeletionFiles.length>200000||this.data.pendingDeletionFiles.some(name=>typeof name!=='string'||!MANAGED_MEDIA.test(name))))fail('Invalid pending deletion state.');
     }
@@ -116,6 +130,7 @@ class Store {
     this.privacyWarning='';
     if(this.data.pendingBackupRefresh||this.data.pendingDeletionFiles?.length)try{this.finishPermanentDeletion();}catch(error){this.privacyWarning=error.message;}
     this.expire();
+    if (this.migratedSettings) this.persist();
   }
   pruneRecentFolders(){const known=new Set(this.data.folders.map(folder=>folder.id));this.data.settings.recentPinFolderIds=(this.data.settings.recentPinFolderIds||[]).filter(id=>known.has(id));}
   validateStored(item) {
@@ -421,4 +436,4 @@ class Store {
     };
   }
 }
-module.exports = {Store, KINDS, DEFAULTS, settings, saved, plainURL, text, ids};
+module.exports = {Store, KINDS, DEFAULTS, settings, migrateWindowsProfile, saved, plainURL, text, ids};
