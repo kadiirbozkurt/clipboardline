@@ -18,4 +18,16 @@ class WindowBounds {
  }
  shown(window){if(this.requested)this.realized=copy(window.getBounds());}
 }
-module.exports={WindowBounds};
+// After a monitor is added, removed or rescaled: shelves cover the work area of
+// the display they are on (or the cursor display); a normal window is kept while
+// it overlaps a live work area, otherwise centered and clamped on the cursor display.
+function relocate(bounds,displays,cursor,{overlay=false}={}){
+ const inside=(area,point)=>point.x>=area.x&&point.x<area.x+area.width&&point.y>=area.y&&point.y<area.y+area.height;
+ const atCursor=(displays.find(display=>inside(display.workArea,cursor))||displays[0]).workArea;
+ if(overlay){const center={x:bounds.x+bounds.width/2,y:bounds.y+bounds.height/2};return copy((displays.find(display=>inside(display.workArea,center))?.workArea)||atCursor);}
+ const overlaps=displays.some(({workArea:area})=>bounds.x<area.x+area.width&&bounds.x+bounds.width>area.x&&bounds.y<area.y+area.height&&bounds.y+bounds.height>area.y);
+ if(overlaps)return copy(bounds);
+ const width=Math.min(bounds.width,atCursor.width),height=Math.min(bounds.height,atCursor.height);
+ return {x:Math.round(atCursor.x+(atCursor.width-width)/2),y:Math.round(atCursor.y+(atCursor.height-height)/2),width,height};
+}
+module.exports={WindowBounds,relocate};
