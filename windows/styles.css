@@ -544,3 +544,15 @@ svg.rope path, svg.line path { fill: none; stroke: #a3a3a9; stroke-width: 1.1; v
 .shelf-tools button { height: 25px; min-height: 25px; min-width: 28px; font-size: 12px; }
 .shelf-title .ui-icon { width: 14px; height: 14px; }
 .shelf-tools .ui-icon { width: 15px; height: 15px; }
+
+/* Clothesline motion: cards drop onto the line, then sway from the clothespin. */
+.shelves .card { transform-origin: 50% calc(-20px - var(--card-width) * .06); transition: translate .35s cubic-bezier(.2,.9,.3,1.3), scale .35s cubic-bezier(.2,.9,.3,1.3), box-shadow .15s ease, background .15s ease; }
+body[data-shelf-motion="opening"] .shelves .card { animation: card-drop .7s cubic-bezier(.2,1.4,.4,1) both; animation-delay: calc(var(--i, 0) * 70ms); }
+.shelves.sway .card { animation: card-sway 6s ease-in-out infinite; animation-delay: calc(var(--i, 0) * -.9s); }
+.shelves .card:hover, .shelves .card.focused { animation-play-state: paused; translate: 0 6px; scale: 1.05; }
+@keyframes card-drop { from { opacity: 0; translate: 0 -40px; rotate: -6deg; } to { opacity: 1; translate: 0 0; rotate: 0deg; } }
+@keyframes card-sway { 0%, 100% { rotate: 0deg; } 50% { rotate: 1.2deg; } }
+.shortcuts-sheet { width: min(560px, 92vw); }
+.shortcut-sheet { display: grid; gap: 4px; max-height: 60vh; overflow: auto; }
+.shortcut-row { display: flex; justify-content: space-between; gap: 16px; padding: 5px 2px; border-bottom: 1px solid #ffffff12; }
+.shortcut-row kbd { margin-left: 4px; }

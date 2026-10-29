@@ -158,7 +158,7 @@ test('an external same-ID image edit invalidates acknowledged preview undo histo
 
 test('canvas export failure blocks native Settings until explicit Save succeeds',async()=>{const f=fixture();await f.ready();await f.key('Space');await f.key('KeyC');await f.pointer('pointerdown',60,30);await f.pointer('pointermove',500,150);await f.pointer('pointerup',500,150);f.failExportOnce();await f.api.command('settings');await f.ready();assert.match(f.overlay,/id="markup-canvas"/);assert.doesNotMatch(f.main,/class="settings-main"/);await f.click('save-image');assert.equal(f.overlay,'');assert.match(f.main,/class="settings-main"/);assert.deepEqual(f.state.items.find(item=>item.id===f.image).crop,{x:60,y:30,width:440,height:120});});
 
-test('Tab saves dirty image crop before switching the open preview; Enter copies the visible text',async()=>{
+test('Tab saves dirty image crop before switching the open preview; Enter pastes the visible text',async()=>{
  const f=fixture();await f.ready();await f.key('Space');await f.key('KeyC');
  await f.pointer('pointerdown',60,30);await f.pointer('pointermove',500,150);await f.pointer('pointerup',500,150);
  await f.key('Tab');
@@ -167,7 +167,7 @@ test('Tab saves dirty image crop before switching the open preview; Enter copies
  assert.match(f.overlay,/aria-label="Text one"/);
  assert.doesNotMatch(f.overlay,/editing-toolbar|id="markup-canvas"/);
  await f.key('Enter');
- assert.equal(f.commands.at(-1).action,'copy');
+ assert.equal(f.commands.at(-1).action,'paste');
  assert.deepEqual(f.commands.at(-1).payload.ids,[f.text1]);
  assert.equal(f.state.windowVisible,false);assert.equal(f.overlay,'');
  assert.equal(f.commands.filter(command=>command.action==='saveImage').length,1);
@@ -206,7 +206,7 @@ test('fresh opening skips an empty enabled image shelf so Space and Enter operat
  assert.match(f.main,/card kind-text focused selected/);
  await f.key('Space');assert.match(f.overlay,/aria-label="Text one"/);
  await f.key('Enter');
- assert.equal(f.commands.at(-1).action,'copy');
+ assert.equal(f.commands.at(-1).action,'paste');
  assert.deepEqual(f.commands.at(-1).payload.ids,[f.text1]);
  assert.equal(f.state.windowVisible,false);
 });
@@ -419,13 +419,13 @@ test('custom shortcut overrides win over newly introduced defaults and hints sho
  await f.key('KeyP');assert.equal(focusedCard(f),f.text1);assert.equal(f.state.items.find(value=>value.id===f.text1).pinned,false);
  await f.key('KeyK',{ctrl:true});
  assert.match(f.overlay,/data-command="previous"[\s\S]*?<kbd>P<\/kbd>/);
- const pinRow=f.overlay.match(/<button[^>]*data-command="pin"[\s\S]*?<\/button>/)?.[0];assert.ok(pinRow);assert.doesNotMatch(pinRow,/<kbd>P(?: |<)/);assert.match(pinRow,/<kbd>Ctrl\+P<\/kbd>/);
+ const pinRow=f.overlay.match(/<button[^>]*data-command="pin"[\s\S]*?<\/button>/)?.[0];assert.ok(pinRow);assert.doesNotMatch(pinRow,/<kbd>P(?: |<)/);assert.match(pinRow,/<kbd>Ctrl\+P \/ Ctrl\+D<\/kbd>/);
  await f.key('Escape');await f.key('KeyP',{ctrl:true});assert.equal(f.state.items.find(value=>value.id===f.text1).pinned,true);
 });
 
 test('disabling or remapping copy, aliases, quick slots and range extension does not leave hardcoded keys active',async()=>{
  const f=fixture();await f.ready();await f.key('ArrowDown');
- f.api.emit({settings:{...f.state.settings,localShortcuts:{copy:'',pin:'',select2:'Q',extendNext:'Shift+J'}}});await f.ready();
+ f.api.emit({settings:{...f.state.settings,localShortcuts:{copy:'',paste:'',pin:'',select2:'Q',extendNext:'Shift+J'}}});await f.ready();
  const before=f.commands.length;
  for(const [code,modifiers]of [['Enter',{}],['KeyC',{ctrl:true}],['KeyP',{}],['KeyP',{ctrl:true}]])await f.key(code,modifiers);
  assert.equal(f.commands.length,before);assert.equal(f.state.windowVisible,true);
@@ -595,7 +595,7 @@ test('unknown-code key events execute default shortcuts with the same letter and
 });
 
 test('legacy lowercase remaps compare canonically without reviving disabled defaults or aliases',async()=>{
- const f=fixture();await f.ready();f.api.emit({settings:{...f.state.settings,localShortcuts:{pin:'Ctrl+Alt+j',library:'l',copy:'',remove:''}}});await f.ready();
+ const f=fixture();await f.ready();f.api.emit({settings:{...f.state.settings,localShortcuts:{pin:'Ctrl+Alt+j',library:'l',copy:'',paste:'',remove:''}}});await f.ready();
  await f.key('KeyJ',{ctrl:true,alt:true});assert.equal(f.state.items.find(value=>value.id===f.image).pinned,true);
  await f.key('Unidentified',{key:'j',ctrl:true,alt:true});assert.equal(f.state.items.find(value=>value.id===f.image).pinned,false);
  const before=f.commands.length;await f.key('',{key:'p'});await f.key('KeyP',{ctrl:true});await f.key('Unidentified',{key:'s'});await f.key('Enter');await f.key('',{key:'c',ctrl:true});
@@ -710,7 +710,7 @@ test('an old shortcut save completion cannot close a newer recorder or release i
  const f=fixture();await f.ready();await f.api.command('settings');await f.ready();await f.click('record-local',{keyAction:'pin'});await f.ready();await f.key('KeyO');const release=f.deferReply('setSettings');await f.click('confirm-modal');await f.key('Escape');await f.click('record-local',{keyAction:'copy'});await f.ready();const begin=f.commands.filter(value=>value.action==='beginShortcutRecording').at(-1);assert.ok(begin);release();await f.ready();assert.match(f.overlay,/Record shortcut/);assert.equal(f.commands.some(value=>value.action==='endShortcutRecording'&&value.payload.token===begin.payload.token),false);await f.key('Escape');assert.equal(f.commands.some(value=>value.action==='endShortcutRecording'&&value.payload.token===begin.payload.token),true);
 });
 
-test('a capture crop owns Enter before the next render tick can copy and hide the shelves',async()=>{
+test('a capture crop owns Enter before the next render tick can paste and hide the shelves',async()=>{
  const f=fixture();await f.ready();
  f.api.emit({viewEvent:{serial:'immediate-capture-crop',selectId:f.image,kind:'image',preview:true,crop:true}});
  await f.key('Enter');
@@ -719,6 +719,6 @@ test('a capture crop owns Enter before the next render tick can copy and hide th
  await f.ready();
  assert.doesNotMatch(f.overlay,/id="markup-canvas"/,'An unchanged crop finishes back in preview');
  await f.key('Enter');
- assert.equal(f.commands.filter(value=>value.action==='copy').length,1,'Enter in the finished preview copies normally');
+ assert.equal(f.commands.filter(value=>value.action==='paste').length,1,'Enter in the finished preview pastes normally');
  assert.equal(f.state.windowVisible,false);
 });
