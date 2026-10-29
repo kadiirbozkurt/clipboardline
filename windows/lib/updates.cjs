@@ -45,12 +45,15 @@ function verifiedInstaller(file,manifest){
   finally{fs.closeSync(descriptor);}
   if(offset!==manifest.size||hash.digest('hex')!==manifest.sha256)throw new Error('Installer integrity check failed');return file;
 }
+// This fork never pulls upstream releases; its owner updates it from the fork.
+const FORK_BUILD = true;
+const FORK_MESSAGE = 'This is your own build. Updates are applied manually from your fork.';
 class Updates {
-  constructor(directory, {build = 0, version='0.0.0', fetcher = boundedFetch, publicKey = PUBLIC_KEY, changed = () => {}, available=()=>{},clock=Date.now} = {}) {
-    this.directory = path.resolve(directory); this.build = build;this.version=version;this.clock=clock; this.fetcher = fetcher; this.publicKey = publicKey; this.changed = changed;this.available=available;
+  constructor(directory, {build = 0, version='0.0.0', fetcher = boundedFetch, publicKey = PUBLIC_KEY, changed = () => {}, available=()=>{},clock=Date.now,forkBuild=false} = {}) {
+    this.directory = path.resolve(directory); this.build = build;this.version=version;this.clock=clock; this.fetcher = fetcher; this.publicKey = publicKey; this.changed = changed;this.available=available;this.forkBuild=forkBuild;
     this.manifest=null;this.installer=null;this.envelope=null;this.announcedBuild=0;this.checkPromise=null;this.downloadPromise=null;this.installPromise=null;
     this.state = {status:'idle',message:'Updates use a public, cryptographically signed Windows channel.',error:null,checkedAt:null,lastAttemptAt:null,currentVersion:version,currentBuild:build};
-    this.restore();this.derive();
+    if(forkBuild)this.state={...this.state,status:'disabled',message:FORK_MESSAGE};else this.restore();this.derive();
   }
   newer(manifest){return manifest.build>this.build&&compareVersions(manifest.version,this.version)>=0;}
   derive(){this.state.busy=['checking','downloading','installing'].includes(this.state.status);this.state.availableVersion=this.manifest?.version||null;this.state.availableBuild=this.manifest?.build||null;this.state.canInstall=!!this.manifest&&!this.state.busy;}
@@ -80,6 +83,7 @@ class Updates {
   }
   announce(){if(this.manifest&&this.manifest.build>this.announcedBuild){this.announcedBuild=this.manifest.build;this.saveQuietly();try{this.available({...this.manifest});}catch{}}}
   check({force=true}={}) {
+    if(this.forkBuild)return Promise.resolve(this.state);
     if(this.checkPromise)return this.checkPromise;
     if(this.downloadPromise||this.installPromise)return Promise.resolve(this.state);
     if(!force&&this.state.lastAttemptAt!=null&&this.clock()-this.state.lastAttemptAt<REFRESH_THROTTLE)return Promise.resolve(this.state);
@@ -99,6 +103,7 @@ class Updates {
     this.checkPromise=operation;operation.finally(()=>{if(this.checkPromise===operation)this.checkPromise=null;});return operation;
   }
   download() {
+    if(this.forkBuild)return Promise.reject(new Error(FORK_MESSAGE));
     if(this.downloadPromise)return this.downloadPromise;
     if(this.installPromise&&this.state.status==='installing')return Promise.reject(new Error('An update is already installing'));
     if(!this.manifest)return Promise.reject(new Error('Check for a signed update first'));
@@ -120,6 +125,7 @@ class Updates {
     this.downloadPromise=operation;operation.then(()=>{if(this.downloadPromise===operation)this.downloadPromise=null;},()=>{if(this.downloadPromise===operation)this.downloadPromise=null;});return operation;
   }
   install(launch){
+    if(this.forkBuild)return Promise.reject(new Error(FORK_MESSAGE));
     if(this.installPromise)return this.installPromise;
     if(typeof launch!=='function')return Promise.reject(new Error('A Windows installer launcher is required'));
     const operation=Promise.resolve().then(async()=>{
@@ -138,4 +144,4 @@ class AutomaticUpdateScheduler{
     return force||this.clock()>=due?this.updates.check({force}):Promise.resolve(state);
   }
 }
-module.exports = {Updates,AutomaticUpdateScheduler,verifyEnvelope,compareVersions,verifiedInstaller,UPDATE_ARGUMENTS,FEED,PUBLIC_KEY,REPOSITORY};
+module.exports = {FORK_BUILD,FORK_MESSAGE,Updates,AutomaticUpdateScheduler,verifyEnvelope,compareVersions,verifiedInstaller,UPDATE_ARGUMENTS,FEED,PUBLIC_KEY,REPOSITORY};
