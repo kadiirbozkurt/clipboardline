@@ -5,7 +5,10 @@ if(-not $Check){
   if(-not [System.IO.Directory]::Exists($Directory)){throw 'The application data directory is unavailable.'}
   # Keep the directory's existing owner/group. Reassigning ownership can require
   # a privilege even when the user may safely change this owned directory's DACL.
-  $acl=Get-Acl -LiteralPath $Directory
+  # Read and write only the DACL; a full Get-Acl/Set-Acl round trip also writes
+  # the SACL, which needs SeSecurityPrivilege once the folder is protected.
+  $dir=[System.IO.DirectoryInfo]::new($Directory)
+  $acl=$dir.GetAccessControl([System.Security.AccessControl.AccessControlSections]::Access)
   $acl.SetAccessRuleProtection($true,$false)
   foreach($existing in @($acl.Access)){[void]$acl.RemoveAccessRuleSpecific($existing)}
   $inherit=[System.Security.AccessControl.InheritanceFlags]'ContainerInherit,ObjectInherit'
@@ -14,7 +17,7 @@ if(-not $Check){
     $rule=[System.Security.AccessControl.FileSystemAccessRule]::new($identity,[System.Security.AccessControl.FileSystemRights]::FullControl,$inherit,[System.Security.AccessControl.PropagationFlags]::None,[System.Security.AccessControl.AccessControlType]::Allow)
     $acl.AddAccessRule($rule)
   }
-  Set-Acl -LiteralPath $Directory -AclObject $acl
+  $dir.SetAccessControl($acl)
 }
 $actual=Get-Acl -LiteralPath $Directory
 $principals=@($actual.Access | Where-Object {$_.AccessControlType -eq 'Allow'} | ForEach-Object {$_.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value})
