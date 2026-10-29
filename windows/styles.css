@@ -556,3 +556,9 @@ body[data-shelf-motion="opening"] .shelves .card { animation: card-drop .7s cubi
 .shortcut-sheet { display: grid; gap: 4px; max-height: 60vh; overflow: auto; }
 .shortcut-row { display: flex; justify-content: space-between; gap: 16px; padding: 5px 2px; border-bottom: 1px solid #ffffff12; }
 .shortcut-row kbd { margin-left: 4px; }
+
+/* Rope scrolling: a new page slides in from the side it came from. */
+.shelves .cards.slide-next { animation: rope-slide-next .32s cubic-bezier(.2,.8,.2,1); }
+.shelves .cards.slide-prev { animation: rope-slide-prev .32s cubic-bezier(.2,.8,.2,1); }
+@keyframes rope-slide-next { from { translate: 60px 0; opacity: .3; } to { translate: 0 0; opacity: 1; } }
+@keyframes rope-slide-prev { from { translate: -60px 0; opacity: .3; } to { translate: 0 0; opacity: 1; } }
