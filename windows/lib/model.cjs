@@ -10,7 +10,7 @@ const MANAGED_MEDIA=/^[a-f0-9]{64}\.(png|mp4|mov)$/;
 
 const KINDS = ['image', 'text', 'link'];
 const DEFAULTS = Object.freeze({
-  visibleKinds: KINDS, captureText: false, captureImages: true, captureLinks: true,fetchLinkMetadata:true,
+  visibleKinds: KINDS, captureText: true, captureImages: true, captureLinks: true,fetchLinkMetadata:true,
   retentionDays: {image: 30, text: 30, link: 30},
   shortcuts: {toggle: 'Control+Alt+V', search: 'Control+Alt+S', library:'', copyLatest:'', screenshot: 'Control+Alt+A'},
   localShortcuts: {},
@@ -18,7 +18,7 @@ const DEFAULTS = Object.freeze({
   theme:'soft', cardSize:'medium', sounds:false, launchAtLogin:false, language:'system',indexImages:true,
   libraryListMode:false,libraryInspectorVisible:true,librarySidebarVisible:true,librarySidebarWidth:220,libraryInspectorWidth:300,
   libraryListColumns:{title:300,kind:80,tags:150,created:130},recentPinFolderIds:[],
-  swayCards:true, windowsProfile:1
+  swayCards:true, windowsProfile:2
 });
 const clone = value => structuredClone(value);
 const fail = message => { throw new Error(message); };
@@ -85,9 +85,14 @@ function settings(patch, previous = DEFAULTS) {
 // One-time move to the Windows profile defaults. Reads the raw stored settings:
 // the merged settings already carry the new defaults for missing keys.
 function migrateWindowsProfile(stored) {
-  if (!stored || typeof stored !== 'object' || (stored.windowsProfile || 0) >= 1) return stored;
-  const out = {...stored, captureImages: true, autoCheckUpdates: false, windowsProfile: 1};
-  if (stored.shortcuts?.toggle === 'Control+Alt+T') out.shortcuts = {...stored.shortcuts, toggle: 'Control+Alt+V'};
+  const version = stored && typeof stored === 'object' ? stored.windowsProfile || 0 : 2;
+  if (version >= 2) return stored;
+  const out = {...stored, windowsProfile: 2};
+  if (version < 1) {
+    Object.assign(out, {captureImages: true, autoCheckUpdates: false});
+    if (stored.shortcuts?.toggle === 'Control+Alt+T') out.shortcuts = {...stored.shortcuts, toggle: 'Control+Alt+V'};
+  }
+  out.captureText = true; // profile 2
   return out;
 }
 function trashUndoFingerprint(item){return crypto.createHash('sha256').update(JSON.stringify(item)).digest('hex');}
@@ -338,7 +343,7 @@ class Store {
       this.persist();this.invalidateTrashUndo(removed);return {ids:[...removed]};
     }
     if(action==='cleanup'){this.finishPermanentDeletion();return;}
-    if (action === 'setSettings') { this.data.settings = settings(payload.patch, this.data.settings);this.pruneRecentFolders();this.expire(false); this.persist(); return; }
+    if (action === 'setSettings') { if (payload.patch && Object.hasOwn(payload.patch, 'windowsProfile')) fail('Invalid preference'); this.data.settings = settings(payload.patch, this.data.settings);this.pruneRecentFolders();this.expire(false); this.persist(); return; }
     if (action === 'createFolder') {
       const name = text(payload.name, 120).trim(); if (!name) fail('Folder name is empty');
       const parentId = payload.parentId || null;
