@@ -29,7 +29,7 @@ const {Updates,AutomaticUpdateScheduler,FORK_BUILD} = require('./lib/updates.cjs
 const {GlobalShortcuts}=require('./lib/global-shortcuts.cjs');
 const {ImageSearch,modelPaths}=require('./lib/image-search.cjs');
 const {StatusTray,trayIcon,translated}=require('./lib/status-summary.cjs');
-const {WindowBounds,relocate}=require('./lib/window-bounds.cjs');
+const {WindowBounds,relocate,relocationNeeded}=require('./lib/window-bounds.cjs');
 const {MotionBridge}=require('./lib/shelf-motion.cjs');
 const BUILD_NUMBER=Number(require('./package.json').clipboardLineBuild)||63;
 const testMode = process.argv.includes('--test-mode');
@@ -436,7 +436,7 @@ else app.whenReady().then(async()=>{
     webPreferences:{preload:path.join(__dirname,'preload.cjs'),nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,devTools:testMode}});
   window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   // Monitor plugged, unplugged or rescaled: keep the window on a live display.
-  const keepOnDisplay=()=>{if(!window||window.isDestroyed()||!window.isVisible())return;const overlay=view==='shelves',next=relocate(window.getBounds(),screen.getAllDisplays(),screen.getCursorScreenPoint(),{overlay});applyingBounds=true;try{windowBounds.apply(window,next,{overlay});}finally{applyingBounds=false;}if(overlay)broadcast({surfaceOnly:true});};
+  const keepOnDisplay=()=>{if(!window||window.isDestroyed()||!window.isVisible())return;const overlay=view==='shelves',next=relocate(window.getBounds(),screen.getAllDisplays(),screen.getCursorScreenPoint(),{overlay});if(!relocationNeeded(window.getBounds(),next,{overlay,maximized:window.isMaximized()}))return;applyingBounds=true;try{windowBounds.apply(window,next,{overlay});}finally{applyingBounds=false;}if(overlay)broadcast({surfaceOnly:true});};
   for(const event of ['display-added','display-removed','display-metrics-changed'])screen.on(event,keepOnDisplay);
   window.webContents.on('will-navigate',(event,url)=>{if(url!==entry)event.preventDefault();});
   window.webContents.on('will-frame-navigate',event=>{if(!event.isMainFrame||event.url!==entry)event.preventDefault();});

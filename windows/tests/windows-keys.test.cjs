@@ -1,12 +1,12 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 // Boots renderer.js with recorded commands and dispatchable document events.
-function fixture({pasteFails=false,settings={},reducedMotion=false}={}){
+function fixture({pasteError='',pasteFails=false,settings={},reducedMotion=false}={}){
  const nodes=new Map(),listeners={};class Element{constructor(tag='DIV'){this.tagName=tag;this.dataset={};this.innerHTML='';this.textContent='';this.style={setProperty(){}};this.classList={add(){},remove(){},toggle(){},contains(){return false;}};}querySelector(){return null;}querySelectorAll(){return [];}setAttribute(){}focus(){}blur(){}matches(selector){return this.tagName==='INPUT'&&selector.includes('input');}closest(){return null;}addEventListener(){}scrollIntoView(){}}
  const document={body:new Element(),documentElement:new Element(),activeElement:null,getElementById:id=>{if(!nodes.has(id))nodes.set(id,new Element());return nodes.get(id);},querySelector:()=>null,querySelectorAll:()=>[],addEventListener(type,fn){(listeners[type]||=[]).push(fn);}};
  const value=(n,kind)=>({id:'80000000-0000-4000-8000-'+String(n).padStart(12,'0'),kind,createdAt:n,updatedAt:n,text:kind==='text'?'body '+n:'',name:'',title:'',url:'',note:'',ocrText:'',pinned:false,folderIds:[],tags:[],hiddenFromShelf:false,trashedAt:null});
  const raw={items:[value(1,'text'),value(2,'text')],folders:[],view:'shelves',windowVisible:true,settings:{visibleKinds:['image','text','link'],localShortcuts:{},shortcuts:{},language:'en',cardSize:'medium',theme:'soft',swayCards:true,...settings}};
- const commands=[];const window={innerWidth:1920,clipboardLine:{state:async()=>structuredClone(raw),subscribe(){},command:async(action,payload)=>{commands.push([action,payload]);if(action==='paste'&&pasteFails)throw new Error('Select an editable field in another application, then reopen the shelves.');return structuredClone(raw);}},addEventListener(){},matchMedia:()=>({matches:reducedMotion,addEventListener(){}})};
+ const commands=[];const window={innerWidth:1920,clipboardLine:{state:async()=>structuredClone(raw),subscribe(){},command:async(action,payload)=>{commands.push([action,payload]);if(action==='paste'&&pasteFails)throw new Error(pasteError||'Select an editable field in another application, then reopen the shelves.');return structuredClone(raw);}},addEventListener(){},matchMedia:()=>({matches:reducedMotion,addEventListener(){}})};
  const context={window,document,HTMLElement:Element,HTMLTextAreaElement:class extends Element{},HTMLInputElement:class extends Element{},Image:class{},URL,console,structuredClone,setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:fn=>fn()};vm.createContext(context);
  vm.runInContext(fs.readFileSync(path.join(__dirname,'../renderer.js'),'utf8').replace(/\}\)\(\);\s*$/,'window.__keys={ui,state,shelves,overlayHTML:typeof overlayHTML==="function"?overlayHTML:null};})();'),context);
  const fire=async(type,init)=>{const event={key:'',code:'',ctrlKey:false,metaKey:false,altKey:false,shiftKey:false,repeat:false,isComposing:false,target:new Element(),defaultPrevented:false,preventDefault(){this.defaultPrevented=true;},...init};for(const fn of listeners[type]||[])await fn(event);return event;};
@@ -24,6 +24,19 @@ test('Enter falls back to copy when the paste target is unavailable',async()=>{
  await f.fire('keydown',{key:'Enter',code:'Enter'});
  assert.deepEqual(names(f).filter(name=>['paste','copy'].includes(name)),['paste','copy']);
  assert.equal(f.toast(),'Copied — paste target unavailable');assert.equal(f.api.ui.focus,focused);
+ assert.equal(f.commands.find(([action])=>action==='copy')[1].keepOpen,true);
+});
+test('other paste failures do not copy or hide',async()=>{
+ const f=fixture({pasteFails:true,pasteError:'Paste canceled by another browsing action.'});await f.ready();focusFirst(f);
+ await f.fire('keydown',{key:'Enter',code:'Enter'});
+ assert.deepEqual(names(f).filter(name=>['paste','copy'].includes(name)),['paste']);assert.equal(f.toast(),'Paste canceled by another browsing action.');
+});
+// The drop must finish inside the 420ms shelf-open motion that gates it.
+test('card drop fits inside the shelf open motion',()=>{
+ const css=fs.readFileSync(path.join(__dirname,'../styles.css'),'utf8'),{OPEN_MS}=require('../lib/shelf-motion.cjs');
+ const rule=css.match(/data-shelf-motion="opening"\] \.shelves \.card \{[^}]*\}/)[0];
+ const duration=Number(rule.match(/card-drop ([\d.]+)s/)[1])*1000,step=Number(rule.match(/var\(--i, 0\) \* (\d+)ms/)[1]);
+ assert.ok(duration+8*step<=OPEN_MS,duration+'+8*'+step);
 });
 test('F2 renames and Ctrl+D pins while the old keys keep working',async()=>{
  const f=fixture();await f.ready();focusFirst(f);

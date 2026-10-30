@@ -162,7 +162,7 @@ These are the Windows defaults, separate from the macOS table. Control replaces 
 
 | Default | Action | Where / details |
 | --- | --- | --- |
-| `Enter` | Paste selection into the previous app | Like Win+V. If no editable target is available it copies instead and says so. Previously: copy selection / current preview | Shelves/shelf previews: copies and closes shelves/preview, returning focus. Library and Library-origin previews: copies and stays open. Editors and dialogs handle Enter first. |
+| `Enter` | Paste selection into the previous app | Like Win+V. If no editable target is available it copies instead and says so. |
 | `Ctrl+C` | Copy and keep browsing | Selected batch, or the current item when a preview is open. |
 | `Ctrl+Enter` | Paste into the previous app | Needs the original editable target; secure or changed targets are rejected. While editing text/image, saves and finishes editing first. |
 | `P / Ctrl+P` | Toggle pin / favorite | One action for images, text and links; supports selected batches. Remapping Pin also replaces Ctrl+P. |

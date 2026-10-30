@@ -30,4 +30,5 @@ function relocate(bounds,displays,cursor,{overlay=false}={}){
  const width=Math.min(bounds.width,atCursor.width),height=Math.min(bounds.height,atCursor.height);
  return {x:Math.round(atCursor.x+(atCursor.width-width)/2),y:Math.round(atCursor.y+(atCursor.height-height)/2),width,height};
 }
-module.exports={WindowBounds,relocate};
+function relocationNeeded(current,next,{overlay=false,maximized=false}={}){return !same(current,next)&&(overlay||!maximized);}
+module.exports={WindowBounds,relocate,relocationNeeded};

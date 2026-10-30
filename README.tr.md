@@ -162,7 +162,7 @@ Bunlar macOS tablosundan ayrı Windows varsayılanlarıdır. Command yerine Cont
 
 | Varsayılan | İşlem | Nerede / ayrıntı |
 | --- | --- | --- |
-| `Enter` | Seçimi önceki uygulamaya yapıştır | Win+V gibi. Düzenlenebilir hedef yoksa kopyalar ve bunu bildirir. Önceki davranış: seçimi / geçerli önizlemeyi kopyala | Askı/askı önizlemesinde kopyalar, askı ve önizlemeyi kapatıp odağı geri verir. Kütüphane ve oradan açılan önizleme açık kalarak kopyalar. Düzenleyiciler ve pencereler Enter’ı önce kendileri işler. |
+| `Enter` | Seçimi önceki uygulamaya yapıştır | Win+V gibi. Düzenlenebilir hedef yoksa kopyalar ve bunu bildirir. |
 | `Ctrl+C` | Kopyala ve gezinmeye devam et | Seçili grup veya önizleme açıksa geçerli öğe. |
 | `Ctrl+Enter` | Önceki uygulamaya yapıştır | Önceki düzenlenebilir hedef gerekir; güvenli veya değişmiş hedefler reddedilir. Metin/görsel düzenlerken önce kaydedip düzenlemeyi bitirir. |
 | `P / Ctrl+P` | Sabitle / favori durumunu değiştir | Görsel, metin ve linkler için tek işlem; çoklu seçimi destekler. Sabitle kısayolu değiştirilince Ctrl+P eşdeğeri de değişir. |

@@ -14,3 +14,6 @@ test('shelves follow the work area of the display they are on after a scale chan
 test('a normal window stays when it is still visible',()=>{const bounds={x:100,y:100,width:900,height:600};assert.deepEqual(relocate(bounds,displays,{x:3000,y:600}),bounds);});
 test('an off-screen normal window is centered on the cursor display',()=>{assert.deepEqual(relocate({x:-3000,y:0,width:900,height:600},displays,{x:3000,y:600}),{x:2560+510,y:366+220,width:900,height:600});});
 test('a normal window larger than the work area is clamped to it',()=>{assert.deepEqual(relocate({x:-5000,y:0,width:3000,height:2000},displays,{x:3000,y:600}),displays[1].workArea);});
+
+const {relocationNeeded}=require('../lib/window-bounds.cjs');
+test('display events never touch a maximized or unchanged normal window',()=>{const a={x:0,y:0,width:900,height:600},b={x:10,y:0,width:900,height:600};assert.equal(relocationNeeded(a,a,{}),false);assert.equal(relocationNeeded(a,b,{maximized:true}),false);assert.equal(relocationNeeded(a,b,{}),true);assert.equal(relocationNeeded(a,a,{overlay:true}),false);assert.equal(relocationNeeded(a,b,{overlay:true,maximized:true}),true);});
